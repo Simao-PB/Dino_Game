@@ -7,6 +7,7 @@ import { criarBackground } from '../Prefabs/background.js';
 import { criarPlataforma } from '../Prefabs/plataforma.js';
 import { criarSprite } from '../Materials/sprite.js';
 import { createCoin } from '../Prefabs/coin.js';
+import { MainCamera } from '../Scripts/MainCamera.js';
 
 import {
   adicionarRigidbody,
@@ -91,6 +92,22 @@ async function iniciarNivel() {
     adicionarBoxCollider(fisica, plataforma);
   }
 
+  // Adicionar limite inferior
+  const limite = new THREE.Mesh(
+    new THREE.BoxGeometry(30, 1, 0.1),
+    new THREE.MeshBasicMaterial({ color: 0xff0000 })
+  );
+
+  limite.name = 'LimiteInferior';
+  limite.position.set(0, -6, 0);
+  limite.userData.tag = 'limit';
+
+  mundo.add(limite);
+  adicionarBoxCollider(fisica, limite);
+
+  limite.visible = false;
+
+
   // Criar o jogador
   const player = await criarSprite('assets/Sprites/Player/Idle (1).png');
 
@@ -118,15 +135,19 @@ async function iniciarNivel() {
   // Scripts do jogo
   const playerScript = new Player(player);
 
+
   const scripts = [
     new DebugFisica(scene, fisica),
     playerScript,
-    new ScoreManager(document.querySelector('#scoreValue'))
-  ];
+    new ScoreManager(document.querySelector('#scoreValue')),
+    new MainCamera(camera, scene)
+  ];  
+
 
   // Inspector
   const gui = new GUI({ title: 'Inspector' });
   gui.add(playerScript, 'movementSpeed', 0, 10, 0.1);
+  gui.add(playerScript, 'jumpPower', 0, 100, 1);
 
   // Configuração da fisica
   const PASSO_FIXO = 1 / 50;
@@ -174,6 +195,10 @@ async function iniciarNivel() {
 
     // Sincronizar os objetos com a fisica
     sincronizarFisica(scene);
+
+    for (const script of scripts) {
+      script.lateUpdate?.();
+    }
 
     // Desenhar a cena
     renderer.render(scene, camera);

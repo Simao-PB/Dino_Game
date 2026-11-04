@@ -11,12 +11,33 @@
       #erro { position: fixed; inset: 20px auto auto 20px; max-width: 600px;
         padding: 20px; background: white; color: #18253b; border-radius: 8px;
         font: 16px/1.5 system-ui; white-space: pre-wrap; }
+      
+      #vidas {
+        position: absolute;
+        left: 2rem;
+        top: 5rem;
+        display: flex;
+        gap: 0.5rem;
+      }
+
+      #vidas img {
+        width: 5rem;
+        height: 5rem;
+        object-fit: contain;
+      }
+        
     </style>
   </head>
   <body>
     <div id="hud">
       <span id="scoreTitle">Score:</span>
       <span id="scoreValue">0000</span>
+
+      <div id="vidas">
+        <img src="/assets/Sprites/Player/Idle (1).png" alt="Vida 1">
+        <img src="/assets/Sprites/Player/Idle (1).png" alt="Vida 2">
+        <img src="/assets/Sprites/Player/Idle (1).png" alt="Vida 3">
+      </div>
     </div>
 
     <script type="module" src="/src/Scenes/nivel1.js"></script>

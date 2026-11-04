@@ -4,6 +4,7 @@ import { criarSprite } from '../Materials/sprite.js';
 export async function criarPlataforma(nome, x, y) {
   const plataforma = new THREE.Group();
   plataforma.name = nome;
+  plataforma.userData.tag = 'platform';
   const esquerda = await criarSprite('assets/Sprites/Parts/1.png');
   const centro = await criarSprite('assets/Sprites/Parts/2.png');
   const direita = await criarSprite('assets/Sprites/Parts/3.png');

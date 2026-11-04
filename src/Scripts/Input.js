@@ -23,4 +23,9 @@ export const Input = {
 
     return value;
   },
+
+  getButton(button) {
+    if (button === 'Jump') return pressed('Space');
+    return false;
+  },
 };
