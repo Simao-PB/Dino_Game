@@ -9,6 +9,8 @@ export class Player {
   #canDoubleJump;
   #jumpPressed = false;
   #lifeImages = [];
+  #lastPlatform = null;
+  #checkpointPosition = null;
 
   movementSpeed = 1;
   jumpPower = 40;
@@ -68,6 +70,7 @@ export class Player {
     if (other.userData.tag === 'platform') {
       this.#grounded = true;
       this.#canDoubleJump = false;
+      this.#lastPlatform = other;
     }
 
     if (other.userData.tag === 'limit' && this.lives > 0) {
@@ -82,9 +85,33 @@ export class Player {
         return;
       }
 
-      // Colocar o jogador na posição inicial
-      this.#playerRb.setTranslation({ x: 0, y: 0 }, true);
+      // Escolher onde o jogador vai reaparecer
+      let respawn;
+
+      if (this.#checkpointPosition) {
+        // Reaparecer no último checkpoint
+        respawn = this.#checkpointPosition;
+
+      } else if (this.#lastPlatform) {
+        // Se ainda não passou num checkpoint,
+        // voltar à última plataforma
+        respawn = {
+          x: this.#lastPlatform.position.x,
+          y: this.#lastPlatform.position.y + 2
+        };
+
+      } else {
+        // Posição inicial de segurança
+        respawn = { x: 0, y: 1 };
+      }
+
+      // Mover o Rigidbody para o respawn
+      this.#playerRb.setTranslation(respawn, true);
+
+      // Parar a velocidade da queda
       this.#playerRb.setLinvel({ x: 0, y: 0 }, true);
+
+
 
       this.#grounded = false;
       this.#canDoubleJump = false;
@@ -100,4 +127,18 @@ export class Player {
       true
     );
   }
+
+  
+  onTriggerEnter(other) {
+    if (other.userData.tag === 'checkpoint') {
+
+      this.#checkpointPosition = {
+        x: other.position.x,
+        y: other.position.y + 1
+      };
+
+      console.log('Checkpoint ativado!');
+    }
+  }
+
 }

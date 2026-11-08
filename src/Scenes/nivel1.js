@@ -8,6 +8,15 @@ import { criarPlataforma } from '../Prefabs/plataforma.js';
 import { criarSprite } from '../Materials/sprite.js';
 import { createCoin } from '../Prefabs/coin.js';
 import { MainCamera } from '../Scripts/MainCamera.js';
+import { Time } from '../Scripts/Time.js';
+import { GameManager } from '../Scripts/GameManager.js';
+import { SceneManager } from '../Scripts/SceneManager.js';
+import { createCloud1 } from '../Prefabs/cloud1.js';
+import { createCloud2 } from '../Prefabs/cloud2.js';
+import { Clouds } from '../Scripts/Clouds.js';
+import { Level1Manager } from '../Scripts/Level1Manager.js';
+import { criarCheckpoint } from '../Prefabs/checkpoint.js'; 
+
 
 import {
   adicionarRigidbody,
@@ -87,6 +96,15 @@ async function iniciarNivel() {
 
   chao.add(plat1, plat2, plat3, plat4);
 
+  
+  // Criar checkpoints
+  const checkpoint1 = criarCheckpoint(fisica, -5.5, 2.1);
+  const checkpoint2 = criarCheckpoint(fisica, 5.5, 2.1);
+
+  // Adicionar ao cenário
+  scene.add(checkpoint1, checkpoint2);
+
+
   // Adicionar colisores às plataformas
   for (const plataforma of chao.children) {
     adicionarBoxCollider(fisica, plataforma);
@@ -94,7 +112,7 @@ async function iniciarNivel() {
 
   // Adicionar limite inferior
   const limite = new THREE.Mesh(
-    new THREE.BoxGeometry(30, 1, 0.1),
+    new THREE.BoxGeometry(40, 1, 0.1),
     new THREE.MeshBasicMaterial({ color: 0xff0000 })
   );
 
@@ -134,6 +152,61 @@ async function iniciarNivel() {
 
   // Scripts do jogo
   const playerScript = new Player(player);
+  const gameManager = new GameManager();
+
+    
+  gameManager.pauseMenu = document.querySelector('#pauseMenu');
+
+  
+  // Criar música de fundo
+  const musicaFundo = new Audio(
+    '/assets/Sounds/BackgroundMusic.mp3'
+  );
+
+  musicaFundo.loop = true;
+  musicaFundo.volume = 0.3;
+
+  // Associar a música ao GameManager
+  gameManager.music = musicaFundo;
+
+  // Iniciar música após uma interação do jogador
+  function iniciarMusica(event) {
+    if (event.type === 'keydown' && event.code === 'Escape') {
+      return;
+    }
+
+    if (gameManager.isPaused) return;
+
+    musicaFundo.play()
+      .then(() => {
+        window.removeEventListener('keydown', iniciarMusica);
+        window.removeEventListener('pointerdown', iniciarMusica);
+      })
+      .catch((erro) => {
+        console.warn('Não foi possível iniciar a música:', erro);
+      });
+  }
+
+  window.addEventListener('keydown', iniciarMusica);
+  window.addEventListener('pointerdown', iniciarMusica);
+
+
+  document.querySelector('#btnResume').addEventListener('click', () => {
+    gameManager.isPaused = false;
+    gameManager.resumeGame();
+  });
+
+  document.querySelector('#btnMenu').addEventListener('click', () => {
+    SceneManager.loadScene('index');
+  });
+
+ //   Posição inicial onde as nuvens serão criadas.
+  const level1Manager = new THREE.Group();
+
+  level1Manager.name = 'Level1Manager';
+  level1Manager.position.set(0, 2.5, 0);
+
+  scene.add(level1Manager);
 
 
   const scripts = [
@@ -141,13 +214,26 @@ async function iniciarNivel() {
     playerScript,
     new ScoreManager(document.querySelector('#scoreValue')),
     new MainCamera(camera, scene)
+    
   ];  
+
+  const level1Script = new Level1Manager(
+    level1Manager,
+    scene,
+    scripts
+  );
+
+  level1Script.cloudPrefab1 = createCloud1;
+  level1Script.cloudPrefab2 = createCloud2;
+
+  scripts.push(level1Script);
 
 
   // Inspector
   const gui = new GUI({ title: 'Inspector' });
   gui.add(playerScript, 'movementSpeed', 0, 10, 0.1);
   gui.add(playerScript, 'jumpPower', 0, 100, 1);
+  gui.add(gameManager, 'isPaused').listen();
 
   // Configuração da fisica
   const PASSO_FIXO = 1 / 50;
@@ -160,49 +246,59 @@ async function iniciarNivel() {
   const eventos = new RAPIER.EventQueue(true);
 
   // Iniciar os scripts
-  for (const script of scripts) {
-    script.start?.();
+  for (const script of [...scripts]) {
+    await script.start?.();
   }
 
   // Ciclo principal do jogo
   renderer.setAnimationLoop((agora) => {
-
-    const dt = Math.min((agora - tempoAnterior) / 1000, 0.1);
+    const dtReal = Math.min((agora - tempoAnterior) / 1000, 0.1);
     tempoAnterior = agora;
 
-    // Atualizar os scripts
-    for (const script of scripts) {
-      script.update?.(dt);
-    }
+    // Verificar a tecla ESC
+    gameManager.update();
 
-    acumulador += dt;
+    // Só atualizar o jogo quando não estiver pausado
+    if (!gameManager.isPaused) {
 
-    // Atualizar a fisica
-    while (acumulador >= PASSO_FIXO) {
+      const dt = dtReal * Time.timeScale;
 
+      // Atualizar os scripts
       for (const script of scripts) {
-        script.fixedUpdate?.();
+        if (script !== gameManager) {
+          script.update?.(dt);
+        }
       }
 
-      // Executar fisica com eventos de colisão
-      fisica.step(eventos);
+      acumulador += dt;
 
-      // Verificar as colisões
-      tratarColisoes(fisica, eventos);
+      // Atualizar a física
+      while (acumulador >= PASSO_FIXO) {
+        for (const script of scripts) {
+          script.fixedUpdate?.(PASSO_FIXO);
+        }
 
-      acumulador -= PASSO_FIXO;
+        fisica.step(eventos);
+        tratarColisoes(fisica, eventos);
+
+        acumulador -= PASSO_FIXO;
+      }
+
+      sincronizarFisica(scene);
+
+      // Atualizar a câmara
+      for (const script of scripts) {
+        script.lateUpdate?.();
+      }
+
+    } else {
+      acumulador = 0;
     }
 
-    // Sincronizar os objetos com a fisica
-    sincronizarFisica(scene);
-
-    for (const script of scripts) {
-      script.lateUpdate?.();
-    }
-
-    // Desenhar a cena
     renderer.render(scene, camera);
   });
+
+
 }
 
 iniciarNivel().catch((erro) => {

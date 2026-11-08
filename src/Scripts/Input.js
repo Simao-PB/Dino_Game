@@ -1,7 +1,10 @@
 
 const keys = new Set();
 
-window.addEventListener('keydown', (event) => keys.add(event.code));
+window.addEventListener('keydown', (event) => {
+  console.log('Tecla premida:', event.code);
+  keys.add(event.code);
+});
 window.addEventListener('keyup', (event) => keys.delete(event.code));
 window.addEventListener('blur', () => keys.clear());
 
@@ -26,6 +29,7 @@ export const Input = {
 
   getButton(button) {
     if (button === 'Jump') return pressed('Space');
+    if (button === 'Pause') return pressed('Escape');
     return false;
   },
 };
