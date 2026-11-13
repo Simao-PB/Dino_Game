@@ -1,72 +1,177 @@
-# Jogo 2D — Three.js e Rapier
+# 🦖 Jogo 2D — Aventura do Dinossauro
 
-As pastas e os ficheiros de código da ficha já estão criados.
-As imagens e os sons fornecidos pelo professor NÃO estão incluídos.
+## 📖 Descrição do Projeto
 
-## Abrir no VS Code
+Este projeto consiste no desenvolvimento de um jogo de plataformas 2D, realizado no âmbito da unidade curricular de **Desenvolvimento de Jogos Web e Móveis**, da Universidade da Beira Interior.
 
-1. Extrai o ZIP (botão direito → Extrair Tudo).
-2. No VS Code, escolhe File → Open Folder e abre a pasta jogo2d que contém package.json.
-3. Copia os assets do Moodle para public/assets, mantendo as subpastas e os nomes.
+O jogo foi desenvolvido utilizando **JavaScript, Three.js e Rapier2D**, permitindo implementar gráficos, animações, movimentação, física e deteção de colisões.
 
-O código procura estas imagens:
+O jogador controla um dinossauro que deve percorrer o cenário, saltar entre plataformas, recolher moedas e evitar perder todas as vidas.
 
-| Ficheiro | Pasta de destino |
-| --- | --- |
-| BG.png | public/assets/Sprites/Objects |
-| 1.png, 2.png, 3.png | public/assets/Sprites/Parts |
-| Idle (1).png | public/assets/Sprites/Player |
+O projeto foi desenvolvido progressivamente, com a introdução de novas funcionalidades em cada ficha prática.
 
-Não cries ficheiros de texto com nomes de imagens: copia as imagens reais.
-Se o download do Moodle contiver a pasta Sprites, copia-a para public/assets.
-Evita uma pasta extra como public/assets/Assets/Sprites.
+## 🛠️ Tecnologias Utilizadas
 
-4. Abre Terminal → New Terminal e executa, um comando de cada vez:
+- **JavaScript** — lógica e funcionalidades do jogo.
+- **Three.js** — criação e renderização do cenário 2D.
+- **Rapier2D** — simulação física e deteção de colisões.
+- **HTML5 e CSS3** — menus, HUD e interfaces.
+- **Vite** — ambiente de desenvolvimento e compilação.
+- **lil-gui** — painel Inspector para testar propriedades do jogo.
+- **Git e GitHub** — controlo de versões.
+
+## 🎮 Funcionalidades Implementadas
+
+### 1. Movimento e Física
+- Movimento horizontal do jogador.
+- Sistema de salto e salto duplo.
+- Gravidade e colisões com plataformas.
+- Câmara que acompanha a personagem.
+- Limites do cenário e deteção de quedas.
+
+### 2. Moedas e Pontuação
+- Moedas distribuídas pelo mapa.
+- Recolha através de colisões do tipo trigger.
+- Sistema de pontuação.
+- Efeitos sonoros ao recolher moedas.
+- Apresentação da pontuação no HUD.
+
+### 3. Sistema de Vidas
+- Três vidas disponíveis.
+- Perda de vida ao cair do cenário.
+- Representação visual das vidas.
+- Ecrã de Game Over quando as vidas acabam.
+- Apresentação da pontuação final.
+
+### 4. Checkpoints e Respawn
+- Checkpoints distribuídos pelo cenário.
+- Ativação através de triggers.
+- Armazenamento da posição do último checkpoint.
+- Respawn no checkpoint ativado.
+- Respawn na última plataforma quando não existe checkpoint ativo.
+
+### 5. Sistema de Pausa
+- Pausa e continuação através da tecla ESC.
+- Interrupção das atualizações do jogo e da física.
+- Menu de pausa com as opções Continuar e Sair.
+- Música de fundo interrompida durante a pausa.
+
+### 6. Cenário e Nuvens
+- Cenário com plataformas, moedas e elementos decorativos.
+- Utilização de Prefabs para criar objetos reutilizáveis.
+- Dois tipos de nuvens.
+- Movimento automático das nuvens.
+- Criação das nuvens através do `Level1Manager`.
+
+### 7. Sistema de Animações
+Foi desenvolvido um sistema de animações baseado num **Animator e num Animation Controller**.
+
+O dinossauro possui cinco estados de animação:
+
+| Animação | Descrição |
+|---|---|
+| Idle | Personagem parada |
+| Walk | Personagem a andar lentamente |
+| Run | Personagem a correr |
+| Jump | Personagem a saltar |
+| Dead | Personagem a morrer |
+
+As transições entre animações são controladas automaticamente através de parâmetros como a velocidade horizontal, a velocidade vertical e o estado da personagem.
+
+A animação de morte é reproduzida antes do respawn ou da transição para o Game Over.
+
+## 🕹️ Controlos
+
+| Tecla | Ação |
+|---|---|
+| A / Seta esquerda | Mover para a esquerda |
+| D / Seta direita | Mover para a direita |
+| Espaço | Saltar / Salto duplo |
+| Shift + direção | Andar lentamente |
+| ESC | Pausar / Continuar |
+
+## 📁 Organização do Projeto
+
+O projeto encontra-se organizado em módulos:
+
+- `src/Animation/` — animações e controllers.
+- `src/Scripts/` — lógica do jogador, física, animações, pontuação e gestão do jogo.
+- `src/Prefabs/` — objetos reutilizáveis, como plataformas, moedas e nuvens.
+- `src/Scenes/` — construção e configuração dos níveis.
+- `src/Materials/` — criação de sprites e materiais.
+- `public/assets/` — imagens, sprites e ficheiros de áudio.
+
+Esta organização facilita a manutenção do código e a implementação de novas funcionalidades.
+
+## 🚀 Como Executar o Projeto
+
+### 1. Clonar o repositório
+
+```bash
+git clone https://github.com/Simao-PB/jogo2d.git
+cd jogo2d
+```
+
+### 2. Instalar as dependências
 
 ```bash
 npm install
+```
+
+### 3. Iniciar o servidor de desenvolvimento
+
+```bash
 npm run dev
 ```
 
-O browser abre o nível automaticamente. Se não abrir, usa o endereço apresentado
-no terminal (normalmente http://localhost:5173/).
-Para parar o servidor, carrega em Ctrl+C.
+Abrir o endereço apresentado no terminal, normalmente:
 
-## Resultado esperado
+`http://localhost:5173/`
 
-Quatro plataformas e um jogador que cai devido à gravidade e colide com a
-plataforma inferior. As caixas de colisão aparecem a verde. Esta ficha não
-implementa movimento por teclado nem animações do jogador.
-
-Se faltar uma imagem, aparece um aviso com o caminho do ficheiro a copiar.
-Depois de copiar os assets, atualiza a página. Na consola (F12 → Console)
-podes consultar a hierarquia de objetos.
-
-## Organização
-
-- public/assets/Sprites: Objects, Parts e Player.
-- public/assets/Sounds: sons do professor.
-- src/Animation: reservado para animações.
-- src/Materials/sprite.js: criação dos sprites.
-- src/Prefabs: background e plataformas reutilizáveis.
-- src/Scenes/nivel1.js: cenário e ciclo de jogo.
-- src/Scripts: física e desenho das caixas de colisão.
-- index.html: página inicial que abre diretamente no endereço do servidor.
-- vite.config.js: configuração de build da página index.html.
-
-## Experiência final: sensores
-
-Os comentários de Fisica.js e nivel1.js indicam as alterações para experimentar
-sensores e eventos de colisão. Descomenta as linhas assinaladas nos dois ficheiros,
-substitui fisica.step() por fisica.step(eventos) e observa a consola. O jogador
-passará a atravessar as plataformas. No final, volta a comentar a experiência.
-
-## Criar a versão final
+### 4. Criar a versão de produção
 
 ```bash
 npm run build
+```
+
+### 5. Testar a versão de produção
+
+```bash
 npm run preview
 ```
 
-Os ficheiros finais ficam em dist. O ZIP não inclui node_modules: npm install
-cria essa pasta no teu computador. Precisas de Node.js e npm instalados.
+## 📌 Evolução do Projeto
+
+| Versão | Funcionalidades |
+|---|---|
+| v1.0 | Estrutura inicial do jogo |
+| v2.0 | Movimento e desenvolvimento dos menus |
+| v3.0 | Moedas, recolha e sistema de pontuação |
+| v4.0 | Saltos, física, câmara e vidas |
+| v5.0 | Pausa, checkpoints, música e nuvens |
+| v6.0 | Animator, Controller e animações Idle, Walk, Run, Jump e Dead |
+
+## 🎯 Objetivo do Projeto
+
+O objetivo principal deste projeto é aplicar os conceitos de desenvolvimento de videojogos, nomeadamente:
+
+- Programação orientada a objetos.
+- Organização modular de código.
+- Criação e reutilização de Prefabs.
+- Implementação de sistemas de física e colisões.
+- Gestão de estados e animações.
+- Desenvolvimento de interfaces para videojogos.
+- Utilização de controlo de versões com Git e GitHub.
+
+## 🎓 Contexto Académico
+
+**Unidade Curricular:** Desenvolvimento de Jogos Web e Móveis  
+**Instituição:** Universidade da Beira Interior  
+**Linguagem principal:** JavaScript  
+**Motor gráfico:** Three.js  
+**Motor de física:** Rapier2D  
+**Versão:** v6.0 — Ficha 7
+
+---
+
+**Projeto desenvolvido para fins académicos, com evolução progressiva através das fichas práticas da unidade curricular.**
