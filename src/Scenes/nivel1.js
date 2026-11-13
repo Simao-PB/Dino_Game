@@ -15,7 +15,10 @@ import { createCloud1 } from '../Prefabs/cloud1.js';
 import { createCloud2 } from '../Prefabs/cloud2.js';
 import { Clouds } from '../Scripts/Clouds.js';
 import { Level1Manager } from '../Scripts/Level1Manager.js';
-import { criarCheckpoint } from '../Prefabs/checkpoint.js'; 
+import { criarCheckpoint } from '../Prefabs/checkpoint.js';
+import { Animator } from '../Scripts/Animator.js';
+import { playerController } from '../Animation/playerController.js';
+
 
 
 import {
@@ -82,7 +85,32 @@ async function iniciarNivel() {
   // Background
   const bgFundos = await criarBackground(0, 0);
   bgFundos.name = 'Background';
+
+  // aumentar o fundo
+  bgFundos.scale.set(1.6, 1.6, 1);
+
+  // ajustar um bocadinho a posição
+  bgFundos.position.set(0, -0.6, 0);
+
   mundo.add(bgFundos);
+
+  // Elementos decorativos
+  const arvore1 = await criarSprite('assets/Sprites/Objects/Tree.png');
+  arvore1.name = 'Arvore1';
+  arvore1.position.set(-6.5, 2.3, 0.5);
+  arvore1.scale.set(0.8, 0.8, 1);
+
+  const arvore2 = await criarSprite('assets/Sprites/Objects/Tree.png');
+  arvore2.name = 'Arvore2';
+  arvore2.position.set(6.5, 2.3, 0.3);
+  arvore2.scale.set(0.7, 0.7, 1);
+
+  const arvore3 = await criarSprite('assets/Sprites/Objects/Tree.png');
+  arvore3.name = 'Arvore3';
+  arvore3.position.set(0.8, -2.2, 0.3); 
+  arvore3.scale.set(0.55, 0.55, 1);
+
+  mundo.add(arvore1, arvore2, arvore3);
 
   // Plataformas
   const chao = new THREE.Group();
@@ -98,8 +126,8 @@ async function iniciarNivel() {
 
   
   // Criar checkpoints
-  const checkpoint1 = criarCheckpoint(fisica, -5.5, 2.1);
-  const checkpoint2 = criarCheckpoint(fisica, 5.5, 2.1);
+  const checkpoint1 = criarCheckpoint(fisica, -6.8, 1.9);
+  const checkpoint2 = criarCheckpoint(fisica, 4.5, 1.9);
 
   // Adicionar ao cenário
   scene.add(checkpoint1, checkpoint2);
@@ -152,6 +180,7 @@ async function iniciarNivel() {
 
   // Scripts do jogo
   const playerScript = new Player(player);
+  const playerAnimator = new Animator(player, playerController);
   const gameManager = new GameManager();
 
     
@@ -212,6 +241,7 @@ async function iniciarNivel() {
   const scripts = [
     new DebugFisica(scene, fisica),
     playerScript,
+    playerAnimator,
     new ScoreManager(document.querySelector('#scoreValue')),
     new MainCamera(camera, scene)
     

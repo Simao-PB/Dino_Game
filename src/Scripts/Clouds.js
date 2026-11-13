@@ -1,6 +1,6 @@
 export class Clouds {
   isMovingLeft = false;
-  speed = 1;
+  speed = 0.3;
 
   constructor(object) {
     this.object = object;
